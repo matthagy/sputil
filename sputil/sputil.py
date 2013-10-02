@@ -8,12 +8,13 @@ __all__ = ['hstack_csc_cols', 'vstack_csr_rows',
            'hstack_csc_mats', 'vstack_csr_mats',
            'vstack_csc_cols', 'vstack_csc_mats',
            'get_select_csc_cols', 'get_select_csr_rows',
+           'get_csc_cols', 'get_csr_rows',
            'remove_csr_rows']
 
 
 
 class unsafe_cs_matrix(object):
-    '''Removes all sanity checks in compressed matric creation
+    '''Removes all sanity checks in compressed matrix creation
     '''
 
     def __init__(self, state, shape):
@@ -147,34 +148,6 @@ def vstack_csc_mats(mats):
                             for col in cols])
 
 
-def get_compressed_elements(m, cls, tp):
-    if tp == 'col':
-        n = m.shape[0]
-        shape = (n, 1)
-    elif tp == 'row':
-        n = m.shape[1]
-        shape = (1, n)
-    else:
-        raise ValueError
-
-    acc = []
-    for i in xrange(m.shape[1]):
-        start, stop = m.indptr[i:i+2]
-        data = m.data[start:stop:]
-        indices = m.indices[start:stop]
-        indptr = np.array([0, len(data)], np.intc)
-        acc.append(cls((data, indices, indptr),
-                       shape))
-    return acc
-
-def get_csc_cols(m):
-    assert isinstance(m, sp.csc_matrix)
-    return get_compressed_elements(m, unsafe_csc_matrix, 'col')
-
-def get_csr_rows(m):
-    assert isinstance(m, sp.csr_matrix)
-    return get_compressed_elements(m, unsafe_csr_matrix, 'row')
-
 def get_select_compressed_elements(m, inxs, cls, tp):
     if tp == 'col':
         n = m.shape[0]
@@ -203,6 +176,12 @@ def get_select_csc_cols(m, inxs):
 def get_select_csr_rows(m, inxs):
     assert isinstance(m, sp.csr_matrix)
     return get_select_compressed_elements(m, inxs, unsafe_csr_matrix, 'row')
+
+def get_csc_cols(m):
+    return get_select_csc_cols(m, xrange(m.shape[1]))
+
+def get_csr_rows(m):
+    return get_select_csr_rows(m, xrange(m.shape[0]))
 
 
 def remove_csr_rows(mat, inxs):

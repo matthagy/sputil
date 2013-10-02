@@ -112,11 +112,35 @@ class TestGetSelectCSCRRows(unittest.TestCase):
 
     def testget_select_csr_rows(self):
         m = make_sparse_matrix(N_rows=200, N_cols=100, format='csr')
-        indices = np.random.randint(0, m.shape[1], 50)
+        indices = np.random.randint(0, m.shape[0], 50)
         rows = spu.get_select_csr_rows(m, indices)
         assert len(rows) == len(indices)
         for inx,row in zip(indices, rows):
             assert_eq_sparse_matrices(row, m.getrow(inx))
+
+
+
+class TestGetCSCCols(unittest.TestCase):
+
+    def testget_csc_cols(self):
+        m = make_sparse_matrix(N_rows=100, N_cols=200, format='csc')
+        indices = range(m.shape[1])
+        cols = spu.get_csc_cols(m)
+        assert len(cols) == len(indices)
+        for inx,col in zip(indices, cols):
+            assert_eq_sparse_matrices(col, m.getcol(inx))
+
+
+class TestGetCSCRRows(unittest.TestCase):
+
+    def testget_csr_rows(self):
+        m = make_sparse_matrix(N_rows=200, N_cols=100, format='csr')
+        indices = range(m.shape[0])
+        rows = spu.get_csr_rows(m)
+        assert len(rows) == len(indices)
+        for inx,row in zip(indices, rows):
+            assert_eq_sparse_matrices(row, m.getrow(inx))
+
 
 class TestRemoveCSRRows(unittest.TestCase):
 
