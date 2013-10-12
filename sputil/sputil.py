@@ -11,21 +11,18 @@ __all__ = ['hstack_csc_cols', 'vstack_csr_rows',
            'get_csc_cols', 'get_csr_rows',
            'remove_csr_rows']
 
+def unsafe_cs_matrix(cls, data, shape):
+    m = cls.__new__(cls)
+    m.data, m.indices, m.indptr = data
+    m._shape = shape
+    m.format = cls.__name__[:3]
+    return m
 
+def unsafe_csc_matrix(data, shape):
+    return unsafe_cs_matrix(sp.csc_matrix, data, shape)
 
-class unsafe_cs_matrix(object):
-    '''Removes all sanity checks in compressed matrix creation
-    '''
-
-    def __init__(self, state, shape):
-        self.data, self.indices, self.indptr = state
-        self._shape = shape
-
-class unsafe_csc_matrix(unsafe_cs_matrix, sp.csc_matrix):
-    pass
-
-class unsafe_csr_matrix(unsafe_cs_matrix, sp.csr_matrix):
-    pass
+def unsafe_csr_matrix(data, shape):
+    return unsafe_cs_matrix(sp.csr_matrix, data, shape)
 
 
 def statck_sparse_1d(mats):
